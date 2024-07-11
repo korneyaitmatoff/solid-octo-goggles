@@ -1,9 +1,11 @@
-FROM python:3.11-alpine
+FROM ubuntu:22.04
 
-WORKDIR /app
-COPY .. /app
+WORKDIR solid_octo_goggles
+COPY . ./
 
-RUN python -m venv venv
-RUN pip install -r requirements.txt
+RUN apt-get update && apt-get install -y python3
+RUN apt-get install -y python3-venv
+RUN apt-get install -y python3-pip
+RUN apt-get install -y libpq-dev
 
-CMD ["python", "app.py"]
+RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org -r requirements.txt

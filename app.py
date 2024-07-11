@@ -1,12 +1,38 @@
-import cherrypy
+from fastapi import FastAPI
+
+from models.response import Response
+from database.handler import DatabaseHandler
+from utilities.config import get_db_config
+
+app = FastAPI()
 
 
-class HelloWorld(object):
-    @cherrypy.expose
-    def index(self):
-        return "Hello world!"
+@app.get('/ping')
+def ping():
+    return Response(
+        status_code=200,
+        data={
+            "response": "pong"
+        }
+    )
 
 
-if __name__ == '__main__':
-    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': 8080})
-    cherrypy.quickstart(HelloWorld(), '/')
+@app.get("/ping_db")
+def check_database():
+    with DatabaseHandler(**get_db_config()) as db:
+        return Response(
+            status_code=200,
+            data={
+                "response": str(db.test_connect())
+            }
+        )
+
+
+@app.get("/check_config")
+def check_config():
+    return Response(
+        status_code=200,
+        data={
+            "response": get_db_config()
+        }
+    )
