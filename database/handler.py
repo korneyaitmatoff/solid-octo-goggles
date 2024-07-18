@@ -18,4 +18,9 @@ class DatabaseHandler:
         self.session.close()
 
     def test_connect(self) -> list:
+        """Function for check connection with database"""
         return self.session.execute(text("SELECT 1;")).all()
+
+    def execute_sql(self, sql: text):
+        """Function for execute sql script"""
+        return self.session.execute(sql)
