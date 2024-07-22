@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from models.response import Response
 from database.handler import DatabaseHandler
+from models.response import Response
 from utilities.config import get_db_config
 
 app = FastAPI()

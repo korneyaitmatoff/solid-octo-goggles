@@ -1,15 +1,26 @@
 """Bootstrap module for build db tables"""
+from sqlalchemy import text
+
 from database.handler import DatabaseHandler
 from utilities.config import get_db_config
-from database.tables import meta
 
 
 def bootstrap():
     """Function for build tables"""
 
+    def read_sql(sql_name: str) -> text:
+        """Function for read file.sql"""
+        with open(f"sql/{sql_name}") as f:
+            res = text(f.read())
+
+            f.close()
+
+            return res
+
     with DatabaseHandler(**get_db_config()) as db:
-        meta.create_all(db.engine)
+        db.execute_sql(sql=read_sql("create_table_manga.sql")),
+        db.execute_sql(sql=read_sql("create_table_chapters.sql")),
 
 
 if __name__ == '__main__':
-    bootstrap()
+    print(bootstrap())

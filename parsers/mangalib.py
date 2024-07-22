@@ -1,7 +1,7 @@
 """Script for Mangalib scrabbing, info mining"""
 import time
-from typing import Any
 from dataclasses import dataclass
+from typing import Any
 
 from playwright.sync_api import sync_playwright
 
