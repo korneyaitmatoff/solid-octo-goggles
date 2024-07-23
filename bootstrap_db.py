@@ -18,8 +18,9 @@ def bootstrap():
             return res
 
     with DatabaseHandler(**get_db_config()) as db:
-        db.execute_sql(sql=read_sql("create_table_manga.sql")),
-        db.execute_sql(sql=read_sql("create_table_chapters.sql")),
+        db.execute_sql(sql=read_sql("create_table_manga.sql"))
+        db.execute_sql(sql=read_sql("create_table_chapters.sql"))
+        db.execute_sql(sql=read_sql("create_table_tasks.sql"))
 
 
 if __name__ == '__main__':
