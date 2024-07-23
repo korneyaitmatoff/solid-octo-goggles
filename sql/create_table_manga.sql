@@ -2,8 +2,7 @@ BEGIN;
 DROP TABLE IF EXISTS manga CASCADE;
 CREATE TABLE manga(
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    info TEXT,
-    genres TEXT
+    title VARCHAR(255),
+    url VARCHAR(255)
 );
 COMMIT;

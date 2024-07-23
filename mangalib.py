@@ -5,6 +5,10 @@ from typing import Any
 
 from playwright.sync_api import sync_playwright
 
+from database.handler import DatabaseHandler
+from database import tables
+from utilities.config import get_db_config
+
 
 @dataclass(frozen=True)
 class MangalibLocators:
@@ -18,28 +22,30 @@ class MangalibLocators:
 
 
 class MangalibParser:
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)" \
+         " Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
 
     def get_manga_list(self, keyword: str) -> list[dict[str, str]]:
         """Получение списка манги"""
         with sync_playwright() as pw:
             browser = pw.chromium.launch(headless=True)
 
-            self.context = browser.new_context()
+            self.context = browser.new_context(user_agent=self.UA)
             self.page = self.context.new_page()
             self.page.goto(f"https://mangalib.me/manga-list?sort=rate&dir=desc&page=1&name={keyword}&site_id=1")
 
             return [
                 {
                     "url": item.get_attribute(name="href"),
-                    "text": item.inner_text()
+                    "title": item.inner_text()
                 } for item in self.page.query_selector_all(MangalibLocators.SEARCH_ELEMENT)
             ]
 
     def get_manga_info(self, url: str) -> dict[str, Any]:
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=False)
+            browser = pw.chromium.launch(headless=True)
 
-            context = browser.new_context()
+            context = browser.new_context(user_agent=self.UA)
             page = context.new_page()
             page.goto(url)
 
@@ -56,9 +62,9 @@ class MangalibParser:
 
     def get_chapters(self, url: str):
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=False)
+            browser = pw.chromium.launch(headless=True)
 
-            context = browser.new_context()
+            context = browser.new_context(user_agent=self.UA)
             page = context.new_page()
             page.goto(url)
 
@@ -78,5 +84,27 @@ class MangalibParser:
 
 
 if __name__ == "__main__":
+    def get_tasks() -> list[Any]:
+        """Function for get tasks from db"""
 
-    print(MangalibParser().get_chapters(url='https://mangalib.me/netoroplivyy-fermer-v-drugom-mire'))
+        with DatabaseHandler(**get_db_config()) as db:
+            return [data for data in db.select(tables.Tasks)]
+
+
+    def delete_task(id: int):
+        """Delete task from DB"""
+        with DatabaseHandler(**get_db_config()) as db:
+            return db.delete(table=tables.Tasks, filters=(tables.Tasks.id == id,))
+
+
+    def add_manga(data: dict[Any, Any]):
+        """Add manga to DB"""
+        with DatabaseHandler(**get_db_config()) as db:
+            db.insert(table=tables.Manga, data=data)
+
+
+    for task in get_tasks():
+        for data in MangalibParser().get_manga_list(keyword=task.name):
+            add_manga(data)
+
+        delete_task(id=task.id)
