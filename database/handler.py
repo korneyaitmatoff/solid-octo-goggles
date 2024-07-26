@@ -1,6 +1,6 @@
 """Database handler module"""
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import create_session
+from sqlalchemy.orm import create_session, sessionmaker
 
 
 class DatabaseHandler:
@@ -17,7 +17,7 @@ class DatabaseHandler:
         self.session = None
 
     def __enter__(self):
-        self.session = create_session(self.engine)
+        self.session = sessionmaker(bind=self.engine)()
 
         return self
 
@@ -32,9 +32,9 @@ class DatabaseHandler:
         """Function for execute sql script"""
         return self.session.execute(sql)
 
-    def select(self, table):
+    def select(self, table, filters: tuple = ()):
         """Function for execute select query"""
-        return self.session.query(table).all()
+        return self.session.query(table).filter(*filters).all()
 
     def delete(self, table, filters):
         """Function for delete rows by filters"""

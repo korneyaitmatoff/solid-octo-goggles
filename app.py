@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from database.handler import DatabaseHandler
 from models.response import Response
+from parsers.mangalib import MangalibParser
 from utilities.config import get_db_config
 
 app = FastAPI()
@@ -28,11 +29,37 @@ def check_database():
         )
 
 
-@app.get("/check_config")
-def check_config():
+@app.get("/get_manga_list/{manga_title}")
+def get_manga_list(title: str):
     return Response(
         status_code=200,
         data={
-            "response": get_db_config()
+            "data": MangalibParser().get_manga_list(keyword=title)
+        }
+    )
+
+
+@app.get("/get_manga_chapters/{url}")
+def get_manga_chapters(url: str):
+    try:
+        return Response(
+            status_code=200,
+            data={
+                "data": MangalibParser().get_chapters(path=url)
+            }
+        )
+    except Exception as e:
+        return Response(
+            status_code=500,
+            data=e
+        )
+
+
+@app.get("/get_translators/{url}")
+def get_manga_translators(url: str):
+    return Response(
+        status_code=200,
+        data={
+            "data": MangalibParser().get_translators(path=url)
         }
     )

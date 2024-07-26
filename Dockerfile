@@ -12,8 +12,3 @@ RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted
 
 RUN playwright install
 RUN playwright install-deps
-
-RUN apt-get update && apt-get -y install cron
-RUN crontab -l | { cat; echo "*/2 * * * * python3 /solid_octo_goggles/mangalib.py"; } | crontab -
-
-CMD ["cron", "-f"]
