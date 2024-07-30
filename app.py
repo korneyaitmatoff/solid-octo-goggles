@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 
 from database.handler import DatabaseHandler
 from models.response import Response
@@ -11,7 +11,7 @@ app = FastAPI()
 @app.get('/ping')
 def ping():
     return Response(
-        status_code=200,
+        status_code=status.HTTP_200_OK,
         data={
             "response": "pong"
         }
@@ -22,17 +22,17 @@ def ping():
 def check_database():
     with DatabaseHandler(**get_db_config()) as db:
         return Response(
-            status_code=200,
+            status_code=status.HTTP_200_OK,
             data={
                 "response": str(db.test_connect())
             }
         )
 
 
-@app.get("/get_manga_list/{manga_title}")
+@app.get("/get_manga_list/{title}")
 def get_manga_list(title: str):
     return Response(
-        status_code=200,
+        status_code=status.HTTP_200_OK,
         data={
             "data": MangalibParser().get_manga_list(keyword=title)
         }
@@ -43,23 +43,30 @@ def get_manga_list(title: str):
 def get_manga_chapters(url: str):
     try:
         return Response(
-            status_code=200,
+            status_code=status.HTTP_200_OK,
             data={
                 "data": MangalibParser().get_chapters(path=url)
             }
         )
     except Exception as e:
         return Response(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             data=e
         )
 
 
 @app.get("/get_translators/{url}")
 def get_manga_translators(url: str):
-    return Response(
-        status_code=200,
-        data={
-            "data": MangalibParser().get_translators(path=url)
-        }
-    )
+    try:
+        return Response(
+            status_code=status.HTTP_200_OK,
+            data={
+                "data": MangalibParser().get_translators(path=url)
+            }
+        )
+    except Exception as e:
+        return Response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            data=e
+        )
+
